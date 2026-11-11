@@ -1,0 +1,107 @@
+{
+  "version": 2,
+  "skills": {
+    "bun-runtime": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "bun-runtime/SKILL.md",
+      "computedHash": "0cfa85b2b8627321aa0ddb630f125225f83e10539bb395f38a59ef10c7a93b7b"
+    },
+    "code-inspection": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "code-inspection/SKILL.md",
+      "computedHash": "e2c4c80fd7f1cffa45b0945240504fff599d2c0787421dde445779cd785f5a86"
+    },
+    "dependency-upgrades": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "dependency-upgrades/SKILL.md",
+      "computedHash": "4edcff4f9f0259c89d4874b501724d3f03189656459ab4e96983199b79b070fd"
+    },
+    "docker-compose": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "docker-compose/SKILL.md",
+      "computedHash": "f199682bbb9cba09f2b64325667ad590fd1cf7e310b5931bf99cc2c973cc1374"
+    },
+    "dockerfile-build": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "dockerfile-build/SKILL.md",
+      "computedHash": "2e721619e7d833eea12546e19807d366257effe2accf175212e50a62a0f754ab"
+    },
+    "documentation-governance": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "documentation-governance/SKILL.md",
+      "computedHash": "eb9a09477c85f94df4762fb0bebda375d01f5d29a99c76c0fe6e9879aad8f2c3"
+    },
+    "mise-environment": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "mise-environment/SKILL.md",
+      "computedHash": "b3d1fd74c791658e3acc320242de0068ea5479c0f4d60890b3fcf1b6b8a6dac1"
+    },
+    "npmrc-config": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "npmrc-config/SKILL.md",
+      "computedHash": "ab9efd2b8e4d6fc7af6d3c90567a267ca9830475c8bc18009ceca29ab366b9c2"
+    },
+    "pnpm-catalogs": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "pnpm-catalogs/SKILL.md",
+      "computedHash": "73c3a8fc1d4c00d840312fd0db01ffdd21e4ccbab12a5e63fffeaa6449eddf50"
+    },
+    "pnpm-settings": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "pnpm-settings/SKILL.md",
+      "computedHash": "ee0e10a41dbe2529b7f833b0da9de3f38f1e058f2aab45ed63194e747455e33f"
+    },
+    "pnpm-workspace": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "pnpm-workspace/SKILL.md",
+      "computedHash": "aaa5cf5e3ddfb6bd87cd206bbb676f927c42cc5433d23227042cf44f4e873e63"
+    },
+    "skill-design": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "skill-design/SKILL.md",
+      "computedHash": "668ade5c50d2f295a655090297bf3f14544eb6f63921823dc9c4627000a12161"
+    },
+    "skill-management": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "skill-management/SKILL.md",
+      "computedHash": "5edcb7aa1d34f6bf8115f815b5ae2d61cc4ac01b495a3e03c27199a989d572a1"
+    },
+    "source-layout": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "source-layout/SKILL.md",
+      "computedHash": "57be4ec1185bd2b429d2c38e0ed54a615799569f9e461a914b7827e3f081e5b3"
+    },
+    "test-infrastructure": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "test-infrastructure/SKILL.md",
+      "computedHash": "51bb51ffcb4c037847d16f773a4769ada5d12eac8a33c74ef28d76f02a5e3ee5"
+    },
+    "typescript-config": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "typescript-config/SKILL.md",
+      "computedHash": "5d2de80cbd1cdab348def72d8bb27a7f138456a9bf0d317cb3dd439643694d99"
+    },
+    "vscode-config": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "vscode-config/SKILL.md",
+      "computedHash": "c7a562f94f2c3b3ec37992d01db1860542899ed1b92a00168169719c6718eb48"
+    }
+  }
+}
