@@ -49,6 +49,27 @@
       "skillPath": "npmrc-config/SKILL.md",
       "computedHash": "ab9efd2b8e4d6fc7af6d3c90567a267ca9830475c8bc18009ceca29ab366b9c2"
     },
+    "orpc": {
+      "source": "middleapi/orpc",
+      "sourceType": "github",
+      "skillPath": "skills/orpc/SKILL.md",
+      "computedHash": "6f32b78ee7865fcdc62eb10cf8a013189f17991d255955cf9c1d399b28319aa2",
+      "installMode": "copy"
+    },
+    "orpc-contract": {
+      "source": "middleapi/orpc",
+      "sourceType": "github",
+      "skillPath": "skills/orpc-contract/SKILL.md",
+      "computedHash": "2155106e4e74de121dad983c1a34cbde073f793ad6fe52a1fbc8bdd2f0c0ae91",
+      "installMode": "copy"
+    },
+    "orpc-openapi": {
+      "source": "middleapi/orpc",
+      "sourceType": "github",
+      "skillPath": "skills/orpc-openapi/SKILL.md",
+      "computedHash": "00079ed1cfb434625405c440467d4904bfb5840dd65d89bd730edde745930f9b",
+      "installMode": "copy"
+    },
     "pnpm-catalogs": {
       "source": "iridescent-collective/skills",
       "sourceType": "github",
