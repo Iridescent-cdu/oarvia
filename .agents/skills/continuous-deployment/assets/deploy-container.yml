@@ -1,0 +1,78 @@
+name: Deploy Container
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        options: [staging, production]
+        required: true
+      image:
+        description: Verified repository@sha256 digest
+        type: string
+        required: true
+      source_sha:
+        description: Full source SHA from the delivery record
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-container-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DEPLOY_IMAGE: ${{ inputs.image }}
+      EXPECTED_SHA: ${{ inputs.source_sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@v3
+      - run: mise exec -- pnpm install --frozen-lockfile
+      # 使用方提供：核验交付记录、digest、源码及目标环境的上线资格。
+      - run: mise exec -- bun run verify:delivery
+        env:
+          DEPLOY_TARGET: ${{ inputs.target }}
+  deploy:
+    needs: check
+    runs-on: [self-hosted, linux, deployment]
+    timeout-minutes: 15
+    environment: ${{ inputs.target }}
+    env:
+      DEPLOY_IMAGE: ${{ inputs.image }}
+      EXPECTED_SHA: ${{ inputs.source_sha }}
+      DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
+      COMPOSE_FILE_PATH: ${{ vars.COMPOSE_FILE_PATH }}
+      COMPOSE_ENV_FILE: ${{ vars.COMPOSE_ENV_FILE }}
+      IMAGE_VARIABLE: ${{ vars.IMAGE_VARIABLE }}
+      COMPOSE_SERVICE: ${{ vars.COMPOSE_SERVICE }}
+      IMAGE_REPOSITORY: ${{ vars.IMAGE_REPOSITORY }}
+      DEPLOYMENT_HEALTH_URL: ${{ vars.DEPLOYMENT_HEALTH_URL }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Update and verify service
+        shell: bash
+        env:
+          DEPLOY_RESULT_FILE: ${{ runner.temp }}/container-deploy-${{ github.run_id }}-${{ github.run_attempt }}.txt
+        run: bash .github/scripts/deploy-container.sh
+      - name: Save deployment result
+        if: always()
+        shell: bash
+        env:
+          DEPLOY_RESULT_FILE: ${{ runner.temp }}/container-deploy-${{ github.run_id }}-${{ github.run_attempt }}.txt
+        run: |
+          if [ -f "$DEPLOY_RESULT_FILE" ]; then
+            cat "$DEPLOY_RESULT_FILE" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'No result for this attempt; deployment was not verified.' >> "$GITHUB_STEP_SUMMARY"
+          fi

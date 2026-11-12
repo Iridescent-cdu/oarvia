@@ -1,0 +1,39 @@
+name: E2E CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, canary]
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@v3
+      - name: Install dependencies
+        run: mise exec -- pnpm install --frozen-lockfile
+      - name: Build production API
+        run: mise exec -- bun run build
+      - name: Verify production Node process
+        run: mise exec -- bun run test:e2e
+      - name: Preserve API diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: api-e2e-${{ github.sha }}-${{ github.run_attempt }}
+          path: artifacts/api-e2e/
+          retention-days: 7
+          if-no-files-found: warn

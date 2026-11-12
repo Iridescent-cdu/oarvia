@@ -1,0 +1,44 @@
+{
+  "name": "oarvia",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "if git rev-parse --git-dir > /dev/null 2>&1; then git config core.hooksPath .githooks; fi",
+    "check:commit": "commitlint",
+    "check:staged": "lint-staged --config lint-staged.config.mjs",
+    "skills:link": "node skills/scripts/link.mjs .",
+    "dev": "pnpm --filter @oarvia/api dev",
+    "build": "pnpm -r build",
+    "start": "pnpm --filter @oarvia/api start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check:code": "ultracite check",
+    "fix:code": "ultracite fix",
+    "check:unused": "knip",
+    "check": "pnpm check:code && pnpm check:unused && pnpm typecheck && pnpm test && pnpm test:release",
+    "ci": "pnpm check && pnpm build && pnpm test:e2e",
+    "test:e2e": "node --test scripts/api-smoke.test.mjs",
+    "size:report": "node .github/scripts/bundle-size.mjs measure",
+    "size:check": "node .github/scripts/bundle-size.mjs check",
+    "dep:update": "taze",
+    "test:release": "node --test .github/scripts/*.test.mjs"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "catalog:",
+    "@lobehub/commitlint-config": "catalog:",
+    "@types/node": "catalog:",
+    "knip": "catalog:",
+    "lint-staged": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "taze": "catalog:",
+    "typescript": "catalog:",
+    "ultracite": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.22.2 <25"
+  },
+  "packageManager": "pnpm@12.18.0"
+}

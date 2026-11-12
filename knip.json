@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/knip/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": ["*.config.{ts,mts}", ".github/scripts/*.mjs"]
+    },
+    "apps/api": {
+      "entry": ["src/**/*.test.ts"]
+    },
+    "packages/contract": {}
+  },
+  "ignore": [".agents/**"]
+}

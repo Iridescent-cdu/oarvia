@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "oxc.oxc-vscode",
+    "antfu.pnpm-catalog-lens",
+    "editorconfig.editorconfig"
+  ]
+}

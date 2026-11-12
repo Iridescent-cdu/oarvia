@@ -1,0 +1,13 @@
+services:
+  api:
+    image: ${API_IMAGE:?set digest-qualified API_IMAGE}
+    env_file:
+      - ${API_RUNTIME_ENV:?set API_RUNTIME_ENV}
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+    ports:
+      - "127.0.0.1:${API_PORT:-3000}:3000"
+    init: true
+    restart: unless-stopped

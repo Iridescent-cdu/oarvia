@@ -1,0 +1,26 @@
+{
+  "name": "@oarvia/api",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch run src/main.ts",
+    "build": "tsdown",
+    "start": "node dist/main.mjs"
+  },
+  "dependencies": {
+    "@oarvia/contract": "workspace:*",
+    "@orpc/openapi": "catalog:api",
+    "@orpc/server": "catalog:api",
+    "@orpc/zod": "catalog:api",
+    "zod": "catalog:api"
+  },
+  "devDependencies": {
+    "@orpc/client": "catalog:api",
+    "@orpc/contract": "catalog:api",
+    "tsdown": "catalog:api"
+  }
+}

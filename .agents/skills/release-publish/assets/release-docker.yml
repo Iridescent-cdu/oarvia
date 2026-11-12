@@ -1,0 +1,157 @@
+name: Publish Docker Image
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag to deliver or recover
+        required: true
+        type: string
+      expected_sha:
+        description: Optional full source SHA; must match the tag
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: container-release-${{ vars.REGISTRY_IMAGE }}
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: >-
+      github.event_name == 'release' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/canary'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      sha: ${{ steps.source.outputs.sha }}
+      version: ${{ steps.source.outputs.version }}
+    steps:
+      - name: Checkout trusted release tooling
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: release-tools
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+      - uses: actions/github-script@v8
+        id: source
+        with:
+          script: |
+            const { resolveSource } = await import(`${process.env.GITHUB_WORKSPACE}/release-tools/.github/scripts/container-release.mjs`);
+            await resolveSource({ github, context, core });
+      - name: Checkout frozen product source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.source.outputs.sha }}
+          path: source
+          persist-credentials: false
+      - name: Check source metadata
+        env:
+          SOURCE_DIRECTORY: source
+          DOCKERFILE: ${{ vars.DOCKERFILE || 'Dockerfile' }}
+          RELEASE_VERSION: ${{ steps.source.outputs.version }}
+        run: node release-tools/.github/scripts/container-release.mjs workspace
+      - uses: jdx/mise-action@v3
+        with:
+          working_directory: source
+      - run: mise exec -- pnpm install --frozen-lockfile
+        working-directory: source
+      - run: mise exec -- bun run ci
+        working-directory: source
+  publish:
+    environment: container-publish
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout trusted release tooling
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: release-tools
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+      - uses: actions/github-script@v8
+        id: source
+        with:
+          script: |
+            const { resolveSource } = await import(`${process.env.GITHUB_WORKSPACE}/release-tools/.github/scripts/container-release.mjs`);
+            await resolveSource({ github, context, core });
+      - name: Checkout frozen product source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.source.outputs.sha }}
+          path: source
+          persist-credentials: false
+      - name: Check source metadata
+        env:
+          SOURCE_DIRECTORY: source
+          DOCKERFILE: ${{ vars.DOCKERFILE || 'Dockerfile' }}
+          RELEASE_VERSION: ${{ steps.source.outputs.version }}
+        run: node release-tools/.github/scripts/container-release.mjs workspace
+      - name: Require the checked source identity
+        env:
+          CHECKED_SHA: ${{ needs.check.outputs.sha }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          CHECKED_VERSION: ${{ needs.check.outputs.version }}
+          RELEASE_VERSION: ${{ steps.source.outputs.version }}
+        run: |
+          test "$CHECKED_SHA" = "$SOURCE_SHA"
+          test "$CHECKED_VERSION" = "$RELEASE_VERSION"
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+      - name: Verify existing immutable version
+        id: existing
+        env:
+          REGISTRY_USER: ${{ secrets.DOCKER_REGISTRY_USER }}
+          REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+          REGISTRY_IMAGE: ${{ vars.REGISTRY_IMAGE }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          RELEASE_VERSION: ${{ steps.source.outputs.version }}
+          SOURCE_REPOSITORY: ${{ github.server_url }}/${{ github.repository }}
+        run: node release-tools/.github/scripts/container-release.mjs lookup
+      - name: Build and upload only the version tag
+        if: steps.existing.outputs.exists != 'true'
+        uses: docker/build-push-action@v6
+        id: build
+        with:
+          context: source
+          file: source/${{ vars.DOCKERFILE || 'Dockerfile' }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ vars.REGISTRY_IMAGE }}:${{ steps.source.outputs.version }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.source.outputs.sha }}
+            org.opencontainers.image.version=${{ steps.source.outputs.version }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          annotations: |
+            index:org.opencontainers.image.revision=${{ steps.source.outputs.sha }}
+            index:org.opencontainers.image.version=${{ steps.source.outputs.version }}
+            index:org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+      - name: Verify version, then promote the channel
+        id: delivery
+        env:
+          REGISTRY_USER: ${{ secrets.DOCKER_REGISTRY_USER }}
+          REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+          REGISTRY_IMAGE: ${{ vars.REGISTRY_IMAGE }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          RELEASE_VERSION: ${{ steps.source.outputs.version }}
+          SOURCE_REPOSITORY: ${{ github.server_url }}/${{ github.repository }}
+          BUILD_DIGEST: ${{ steps.build.outputs.digest || steps.existing.outputs.digest }}
+        run: node release-tools/.github/scripts/container-release.mjs verify
+      - uses: actions/upload-artifact@v6
+        if: always() && steps.delivery.outcome != 'skipped'
+        with:
+          name: container-delivery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/container-delivery.json
+          if-no-files-found: error

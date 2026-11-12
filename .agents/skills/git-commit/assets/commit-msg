@@ -1,0 +1,3 @@
+#!/bin/sh
+set -eu
+mise exec -- pnpm exec commitlint --edit "$1"
