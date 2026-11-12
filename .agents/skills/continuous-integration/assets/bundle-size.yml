@@ -1,0 +1,84 @@
+name: Bundle Size
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bundle-size-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  measure:
+    name: Measure (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [baseline, current]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ matrix.target == 'baseline' && github.event.pull_request.base.sha || github.sha }}
+          persist-credentials: false
+      - uses: jdx/mise-action@v3
+      - name: Install dependencies
+        run: mise exec -- pnpm install --frozen-lockfile
+      - name: Build production output
+        run: mise exec -- bun run build
+      - name: Measure required targets
+        env:
+          SIZE_SOURCE_SHA: ${{ matrix.target == 'baseline' && github.event.pull_request.base.sha || github.sha }}
+        run: mise exec -- bun run size:report --out size-report.json
+      - uses: actions/upload-artifact@v6
+        with:
+          name: size-${{ matrix.target }}-${{ github.sha }}
+          path: size-report.json
+          if-no-files-found: error
+          retention-days: 7
+
+  compare:
+    name: Compare Bundle Size
+    needs: measure
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Require both measurements
+        env:
+          MEASURE_RESULT: ${{ needs.measure.result }}
+        run: test "$MEASURE_RESULT" = success
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@v3
+      - name: Install dependencies
+        run: mise exec -- pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v7
+        with:
+          name: size-baseline-${{ github.sha }}
+          path: size-input/baseline
+      - uses: actions/download-artifact@v7
+        with:
+          name: size-current-${{ github.sha }}
+          path: size-input/current
+      - name: Compare and enforce budgets
+        env:
+          SIZE_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          SIZE_CURRENT_SHA: ${{ github.sha }}
+        run: >-
+          mise exec -- bun run size:check
+          --baseline size-input/baseline/size-report.json
+          --current size-input/current/size-report.json
+          --report bundle-size-report.md
+      - name: Preserve comparison report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: bundle-size-report-${{ github.sha }}
+          path: bundle-size-report.md
+          retention-days: 7
+          if-no-files-found: warn

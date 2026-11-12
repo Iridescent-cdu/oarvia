@@ -1,0 +1,41 @@
+name: Bundle Size Initialization
+
+on:
+  pull_request:
+  push:
+    branches: [main, canary]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bundle-size-initialize-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@v3
+      - name: Install dependencies
+        run: mise exec -- pnpm install --frozen-lockfile
+      - name: Build production output
+        run: mise exec -- bun run build
+      - name: Measure current output
+        env:
+          SIZE_SOURCE_SHA: ${{ github.sha }}
+        run: mise exec -- bun run size:report --out size-report.json
+      - uses: actions/upload-artifact@v6
+        with:
+          name: size-initialization-${{ github.sha }}
+          path: size-report.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Explain initialization result
+        run: |
+          echo 'Measurement completed. No baseline comparison or budget verdict was performed.' >> "$GITHUB_STEP_SUMMARY"

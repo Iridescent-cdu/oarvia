@@ -13,6 +13,19 @@
       "skillPath": "code-inspection/SKILL.md",
       "computedHash": "e2c4c80fd7f1cffa45b0945240504fff599d2c0787421dde445779cd785f5a86"
     },
+    "continuous-deployment": {
+      "source": "../skills",
+      "sourceType": "local",
+      "computedHash": "5a06667a8e0108517f0fa7f3e64384231fe74d15ba5447b2419b977e51bf633b",
+      "installMode": "copy"
+    },
+    "continuous-integration": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "continuous-integration/SKILL.md",
+      "computedHash": "5ac64f631f3a1a740ba39cc4841cd4c93bb2e7f27e5b6f259435ad720215ef5a",
+      "installMode": "copy"
+    },
     "dependency-upgrades": {
       "source": "iridescent-collective/skills",
       "sourceType": "github",
@@ -23,7 +36,7 @@
       "source": "iridescent-collective/skills",
       "sourceType": "github",
       "skillPath": "docker-compose/SKILL.md",
-      "computedHash": "f199682bbb9cba09f2b64325667ad590fd1cf7e310b5931bf99cc2c973cc1374"
+      "computedHash": "b734b0d0e39cc0b2c68a1a66fcaf40a77bab91084b7f49f41166aa259107919b"
     },
     "dockerfile-build": {
       "source": "iridescent-collective/skills",
@@ -35,7 +48,22 @@
       "source": "iridescent-collective/skills",
       "sourceType": "github",
       "skillPath": "documentation-governance/SKILL.md",
-      "computedHash": "eb9a09477c85f94df4762fb0bebda375d01f5d29a99c76c0fe6e9879aad8f2c3"
+      "computedHash": "bee775e266a43906a7089c6d4025c6c176d6129a9b3bf67a7d8b528e89cdd3d4",
+      "installMode": "copy"
+    },
+    "git-commit": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "git-commit/SKILL.md",
+      "computedHash": "38063cdac553b165edc10517782605bdb61aa2a796822d91bcf60318e629a53a",
+      "installMode": "copy"
+    },
+    "git-workflow": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "git-workflow/SKILL.md",
+      "computedHash": "72e082ae5ccf0a91fe5f3df761aa3de5071b80de011dbc4325b78747d4c43385",
+      "installMode": "copy"
     },
     "mise-environment": {
       "source": "iridescent-collective/skills",
@@ -88,17 +116,26 @@
       "skillPath": "pnpm-workspace/SKILL.md",
       "computedHash": "aaa5cf5e3ddfb6bd87cd206bbb676f927c42cc5433d23227042cf44f4e873e63"
     },
+    "release-publish": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "release-publish/SKILL.md",
+      "computedHash": "046bebabd15b47f318c636618eb8d3d0252ab86864e63a9367d6e5f331e9c0f8",
+      "installMode": "copy"
+    },
     "skill-design": {
       "source": "iridescent-collective/skills",
       "sourceType": "github",
       "skillPath": "skill-design/SKILL.md",
-      "computedHash": "668ade5c50d2f295a655090297bf3f14544eb6f63921823dc9c4627000a12161"
+      "computedHash": "68673ee532f408347ec90d51c82e9fd5c1fbb86efe554ce83721b561c255806d",
+      "installMode": "copy"
     },
     "skill-management": {
       "source": "iridescent-collective/skills",
       "sourceType": "github",
       "skillPath": "skill-management/SKILL.md",
-      "computedHash": "5edcb7aa1d34f6bf8115f815b5ae2d61cc4ac01b495a3e03c27199a989d572a1"
+      "computedHash": "cfc702ad989dceb005baea00f3d99d7c0ec26235e7685433dee589d39ec1d5d2",
+      "installMode": "copy"
     },
     "source-layout": {
       "source": "iridescent-collective/skills",
@@ -117,6 +154,13 @@
       "sourceType": "github",
       "skillPath": "typescript-config/SKILL.md",
       "computedHash": "5d2de80cbd1cdab348def72d8bb27a7f138456a9bf0d317cb3dd439643694d99"
+    },
+    "version-release": {
+      "source": "iridescent-collective/skills",
+      "sourceType": "github",
+      "skillPath": "version-release/SKILL.md",
+      "computedHash": "ebe7885f5cb0adcdcd1ec1fd7359b687a4c620a30d5578637a2d325bfaa81b80",
+      "installMode": "copy"
     },
     "vscode-config": {
       "source": "iridescent-collective/skills",

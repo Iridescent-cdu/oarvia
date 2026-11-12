@@ -1,0 +1,59 @@
+name: Sync Main to Canary
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: sync-main-to-canary
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    environment: release-control
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/canary'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/create-github-app-token@v2
+        id: bot
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+      - uses: actions/github-script@v8
+        with:
+          github-token: ${{ steps.bot.outputs.token }}
+          script: |
+            const repo = context.repo;
+            const { data: main } = await github.rest.repos.getBranch({ ...repo, branch: 'main' });
+            const { data: canary } = await github.rest.repos.getBranch({ ...repo, branch: 'canary' });
+            const { data: comparison } = await github.rest.repos.compareCommitsWithBasehead({
+              ...repo, basehead: `canary...${main.commit.sha}`,
+            });
+            if (comparison.ahead_by === 0) return;
+            if (!canary.protected) {
+              try {
+                await github.rest.repos.merge({
+                  ...repo, base: 'canary', head: main.commit.sha,
+                  commit_message: '🔧 chore(sync): merge main into canary',
+                });
+                return;
+              } catch (error) {
+                if (error.status !== 409) throw error;
+              }
+            }
+            const { data: pulls } = await github.rest.pulls.list({
+              ...repo, state: 'open', base: 'canary', head: `${repo.owner}:main`,
+            });
+            if (pulls.length > 0) return;
+            await github.rest.pulls.create({
+              ...repo, base: 'canary', head: 'main',
+              title: '🚀 release: sync main into canary',
+              body: 'Synchronize main into canary through this PR. If conflicts occur, resolve main into a canary-based sync branch; do not merge canary into main.',
+            });

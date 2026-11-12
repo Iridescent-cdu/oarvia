@@ -1,0 +1,39 @@
+name: Release PR Version
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: release-pr-version-${{ github.event.pull_request.number }}
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  version:
+    environment: release-control
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+      - uses: actions/create-github-app-token@v2
+        id: bot
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+      - uses: actions/github-script@v8
+        with:
+          github-token: ${{ steps.bot.outputs.token }}
+          script: |
+            const { prepare } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/release.mjs`);
+            await prepare({ github, context, core });

@@ -1,0 +1,3 @@
+#!/bin/sh
+set -eu
+mise exec -- bun run check:staged

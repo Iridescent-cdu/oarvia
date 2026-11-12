@@ -1,0 +1,43 @@
+name: E2E CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, canary]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@v3
+      - name: Install dependencies
+        run: mise exec -- pnpm install --frozen-lockfile
+      - name: Install browsers and system dependencies
+        run: mise exec -- bun run e2e:install
+      # 有数据库时在 job 层配置 services 健康检查，在这里插入项目迁移步骤。
+      - name: Build production application
+        run: mise exec -- bun run build
+      - name: Run production E2E scenarios
+        run: mise exec -- bun run e2e:ci
+      - name: Preserve failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-${{ github.sha }}-${{ github.run_attempt }}
+          path: e2e/artifacts/
+          retention-days: 7
+          if-no-files-found: warn

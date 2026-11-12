@@ -1,0 +1,36 @@
+name: Test CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, canary]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@v3
+      - name: Install dependencies
+        run: mise exec -- pnpm install --frozen-lockfile
+      - name: Check code and formatting
+        run: mise exec -- bun run check:code
+      - name: Check unused dependencies and exports
+        run: mise exec -- bun run check:unused
+      - name: Check types
+        run: mise exec -- bun run typecheck
+      - name: Run tests
+        run: mise exec -- bun run test
+      - name: Build production output
+        run: mise exec -- bun run build
